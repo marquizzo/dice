@@ -6,6 +6,7 @@
  */
 
 import * as THREE from "three";
+import * as CANNON from "cannon-es";
 
 import vertShader from "./glsl/torus.vs";
 import fragShader from "./glsl/torus.fs";
@@ -21,11 +22,13 @@ const GEOM = {
 };
 
 export default class Die {
-	mesh: THREE.Mesh;
-	timeU: THREE.IUniform;
+	public mesh: THREE.Mesh;
+	public body: CANNON.Body;
+	public shapePhys: CANNON.ConvexPolyhedron;
 
-	constructor(parentScene: THREE.Scene, sides: SideTypes) {
-		const geom = this.getGeometry(sides);
+	private timeU: THREE.IUniform;
+
+	constructor(sides: SideTypes) {
 		/*const mat = new THREE.RawShaderMaterial({
 			uniforms: {
 				time: {value: 0}
@@ -33,44 +36,61 @@ export default class Die {
 			vertexShader: vertShader,
 			fragmentShader: fragShader
 		});*/
-		const mat = new THREE.MeshNormalMaterial();
 		// this.timeU = mat.uniforms.time;
+		const geom = this.updateGeometry(sides);
+		const mat = new THREE.MeshNormalMaterial();
 		this.mesh = new THREE.Mesh(geom, mat);
-		parentScene.add(this.mesh);
+		this.body = new CANNON.Body({
+			mass: 5,
+			shape: this.shapePhys
+		})
 	}
 
 	// Returns new geometry based on sides
-	private getGeometry(sides: SideTypes) {
+	private updateGeometry(sides: SideTypes): THREE.BufferGeometry {
+		let newGeom: THREE.BufferGeometry;
+
 		switch (sides) {
 			case 4:
-				return GEOM.tetra;
+				newGeom = GEOM.tetra;
 			break;
 			case 6:
-				return GEOM.cube;
+				newGeom = GEOM.cube;
 			break;
 			case 8:
-				return GEOM.octa;
+				newGeom = GEOM.octa;
 			break;
 			case 12:
-				return GEOM.dodeca;
+				newGeom = GEOM.dodeca;
 			break;
 			case 20:
-				return GEOM.icos;
+				newGeom = GEOM.icos;
 			break;
 		}
+
+		const pos = newGeom.getAttribute("position").array;
+		const vertArray: Array<CANNON.Vec3> = [];
+		// Extract geometry into Cannon vertex array
+		for(let i3 = 0; i3 < pos.length; i3 += 3) {
+			vertArray.push(new CANNON.Vec3(
+				pos[i3 + 0],
+				pos[i3 + 1],
+				pos[i3 + 2],
+			));
+		}
+		this.shapePhys = new CANNON.ConvexPolyhedron({ vertices: vertArray });
+
+		return newGeom;
 	}
 
 	public onDieTypeChange(sides: SideTypes) {
-		const newGeom = this.getGeometry(sides);
+		const newGeom = this.updateGeometry(sides);
 		this.mesh.geometry = newGeom;
 	}
 
 	public update(secs: number): void {
 		// this.timeU.value = secs;
-		this.mesh.rotation.set(
-			Math.sin(secs / 10) * 2 * Math.PI,
-			Math.cos(secs / 10) * 2 * Math.PI,
-			0
-		);
+		this.mesh.position.copy(this.body.position as any as THREE.Vector3);
+		this.mesh.quaternion.copy(this.body.quaternion as any as THREE.Quaternion);
 	}
 }
