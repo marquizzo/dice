@@ -10,7 +10,8 @@
 		// Shortcuts to avoid up-one-level hell: 
 		// Turns "../../../utils" into "Utils"
 		"paths": {
-			"Utils": ["src/utils"]
+			"~Utils/*": ["src/utils/*"],
+			"~Utils": ["src/utils"]
 		},
 
 		// Gives error if there are implied "<any>" types.

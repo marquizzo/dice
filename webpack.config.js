@@ -19,7 +19,7 @@ module.exports = {
 		// Shortcuts to avoid up-one-level hell: 
 		// Turns "../../../utils" into "Utils"
 		alias: {
-			Utils: path.resolve(__dirname, "./src/utils/"),
+			"~Utils": path.resolve(__dirname, "./src/utils/"),
 		},
 	},
 

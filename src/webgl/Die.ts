@@ -9,16 +9,23 @@ import * as THREE from "three";
 
 import vertShader from "./glsl/torus.vs";
 import fragShader from "./glsl/torus.fs";
-import { randInt } from "Utils";
+import { randInt } from "~Utils";
+import { SideTypes } from "~Utils/Constants";
 
-type SideCount = 4 | 6 | 8 | 12 | 20;
+const GEOM = {
+	tetra: new THREE.TetrahedronGeometry(1),
+	cube: new THREE.BoxGeometry(1),
+	octa: new THREE.OctahedronGeometry(1),
+	dodeca: new THREE.DodecahedronGeometry(1),
+	icos: new THREE.IcosahedronGeometry(1),
+};
 
 export default class Die {
 	mesh: THREE.Mesh;
 	timeU: THREE.IUniform;
 
-	constructor(parentScene: THREE.Scene, sides: SideCount) {
-		const geom = this.buildGeometry(sides);
+	constructor(parentScene: THREE.Scene, sides: SideTypes) {
+		const geom = this.getGeometry(sides);
 		/*const mat = new THREE.RawShaderMaterial({
 			uniforms: {
 				time: {value: 0}
@@ -32,24 +39,30 @@ export default class Die {
 		parentScene.add(this.mesh);
 	}
 
-	private buildGeometry(sides: SideCount) {
+	// Returns new geometry based on sides
+	private getGeometry(sides: SideTypes) {
 		switch (sides) {
 			case 4:
-				return new THREE.TetrahedronGeometry(1);
+				return GEOM.tetra;
 			break;
 			case 6:
-				return new THREE.BoxGeometry(1);
+				return GEOM.cube;
 			break;
 			case 8:
-				return new THREE.OctahedronGeometry(1);
+				return GEOM.octa;
 			break;
 			case 12:
-				return new THREE.DodecahedronGeometry(1);
+				return GEOM.dodeca;
 			break;
 			case 20:
-				return new THREE.IcosahedronGeometry(1);
+				return GEOM.icos;
 			break;
 		}
+	}
+
+	public onDieTypeChange(sides: SideTypes) {
+		const newGeom = this.getGeometry(sides);
+		this.mesh.geometry = newGeom;
 	}
 
 	public update(secs: number): void {

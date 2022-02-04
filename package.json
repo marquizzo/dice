@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "three": "0.137.0",
+    "tweakpane": "^3.0.7",
     "webpack": "4.46.0"
   },
   "devDependencies": {

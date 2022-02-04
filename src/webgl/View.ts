@@ -6,8 +6,8 @@
  */
 
 import * as THREE from "three";
-
 import Die from "./Die";
+import { SideTypes } from "~Utils/Constants";
 
 export default class View {
 	private renderer: THREE.WebGLRenderer;
@@ -28,6 +28,10 @@ export default class View {
 
 		// Set initial sizes
 		this.onWindowResize(window.innerWidth, window.innerHeight);
+	}
+
+	public onDieTypeChange(sides: SideTypes) {
+		this.torus.onDieTypeChange(sides);
 	}
 
 	public onWindowResize(vpW: number, vpH: number): void {
