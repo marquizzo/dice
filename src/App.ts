@@ -13,15 +13,25 @@ class App {
 	private view: View;
 	private pane: any;
 	private dieSides: SideTypes = 4;
+	private gravity = {x: 0, y: 9.82};
 
 	constructor() {
 		const canvasBox = <HTMLCanvasElement>document.getElementById("webgl-canvas");
 		this.view = new View(canvasBox);
+
+		// Add GUI
 		this.pane = new Pane();
 		this.pane.addInput(this, "dieSides", {
 			options: {4: 4, 6: 6, 8: 8, 12: 12, 20: 20},
 			label: "Die sides",
 		}).on("change", this.dieTypeChanged);
+		this.pane.addInput(this, "gravity", {
+			picker: 'inline',
+			expanded: true,
+			label: "Gravity",
+			x: { min: -10, max: 10},
+			y: { min: -10, max: 10},
+		}).on("change", this.gravityChanged);
 
 		window.addEventListener("resize", this.resize);
 		this.update(0);
@@ -29,6 +39,10 @@ class App {
 
 	private dieTypeChanged = (ev: any): void => {
 		this.view.onDieTypeChange(ev.value);
+	}
+
+	private gravityChanged = (ev: any): void => {
+		this.view.onGravityChange(this.gravity);
 	}
 
 	private resize = (): void => {

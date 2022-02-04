@@ -56,6 +56,10 @@ export default class View {
 		this.die.updateGeometry(sides);
 	}
 
+	public onGravityChange(gravity: any) {
+		this.world.gravity.set(gravity.x, -gravity.y, 0);
+	}
+
 	public onWindowResize(vpW: number, vpH: number): void {
 		this.renderer.setSize(vpW, vpH);
 		this.camera.aspect = vpW / vpH;
