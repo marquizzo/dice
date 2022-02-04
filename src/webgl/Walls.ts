@@ -9,10 +9,12 @@ export default class Walls {
 	private planeTop: CANNON.Body;
 	private planeLeft: CANNON.Body;
 	private planeRight: CANNON.Body;
+	private planeBack: CANNON.Body;
+	private planeFront: CANNON.Body;
 
 	constructor() {
-		const w = 12;
 		const h = 8;
+		const w = h * window.innerWidth / window.innerHeight;
 		const d = 10;
 		this.mat = new THREE.MeshNormalMaterial();
 
@@ -29,19 +31,17 @@ export default class Walls {
 		const geomBot = new THREE.PlaneGeometry(w, d);
 		geomBot.rotateX(-Math.PI / 2);
 		geomBot.translate(0, -h/2, 0);
-
-		// Make mesh
 		const geomAll = mergeBufferGeometries([geomLeft, geomRight, geomTop, geomBot]);
 		this.mesh = new THREE.Mesh(geomAll, this.mat);
 
 		// Cannon walls
-		this.planeBot = this.makePlane();
-		this.planeBot.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
-		this.planeBot.position.y = -h/2;
-
 		this.planeTop = this.makePlane();
 		this.planeTop.quaternion.setFromEuler(Math.PI / 2, 0, 0);
 		this.planeTop.position.y = h/2;
+
+		this.planeBot = this.makePlane();
+		this.planeBot.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+		this.planeBot.position.y = -h/2;
 
 		this.planeLeft = this.makePlane();
 		this.planeLeft.quaternion.setFromEuler(0, Math.PI / 2, 0);
@@ -50,6 +50,14 @@ export default class Walls {
 		this.planeRight = this.makePlane();
 		this.planeRight.quaternion.setFromEuler(0, -Math.PI / 2, 0);
 		this.planeRight.position.x = w/2;
+
+		this.planeBack = this.makePlane();
+		this.planeBack.quaternion.setFromEuler(0, 0, Math.PI);
+		this.planeBack.position.z = -d/2;
+
+		this.planeFront = this.makePlane();
+		// this.planeFront.quaternion.setFromEuler(0, 0, 0);
+		this.planeFront.position.z = -d/2;
 	}
 
 	private makePlane(): CANNON.Body {
@@ -67,5 +75,7 @@ export default class Walls {
 		world.addBody(this.planeTop);
 		world.addBody(this.planeLeft);
 		world.addBody(this.planeRight);
+		world.addBody(this.planeBack);
+		// world.addBody(this.planeFront);
 	}
 }

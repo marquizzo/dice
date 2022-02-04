@@ -84,7 +84,8 @@ export default class Die {
 		// Reset body
 		this.boundShape = new CANNON.ConvexPolyhedron({ vertices: vertArray });
 		this.body.addShape(this.boundShape);
-		this.body.position.setZero();
+		this.body.position.set(0, 0, -3);
+		this.body.velocity.setZero();
 
 		const randFloat = THREE.MathUtils.randFloatSpread;
 		this.body.angularVelocity.set(

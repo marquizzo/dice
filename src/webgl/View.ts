@@ -57,7 +57,7 @@ export default class View {
 	}
 
 	public onGravityChange(gravity: any) {
-		this.world.gravity.set(gravity.x, -gravity.y, 0);
+		this.world.gravity.set(0, -gravity.y, gravity.x);
 	}
 
 	public onWindowResize(vpW: number, vpH: number): void {
@@ -67,7 +67,8 @@ export default class View {
 	}
 
 	public update(secs: number): void {
-		this.world.step(this.clock.getDelta());
+		const delta = Math.min(this.clock.getDelta(), 0.5);
+		this.world.step(delta);
 		this.die.update(secs);
 		this.renderer.render(this.scene, this.camera);
 	}
