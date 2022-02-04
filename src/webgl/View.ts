@@ -13,7 +13,7 @@ export default class View {
 	private renderer: THREE.WebGLRenderer;
 	private scene: THREE.Scene;
 	private camera: THREE.PerspectiveCamera;
-	private torus: Die;
+	private die: Die;
 
 	constructor(canvasElem: HTMLCanvasElement) {
 		this.renderer = new THREE.WebGLRenderer({
@@ -24,14 +24,14 @@ export default class View {
 		this.camera.position.z = 10;
 		this.scene = new THREE.Scene();
 		this.scene.background = new THREE.TextureLoader().load("./textures/bgnd.png");
-		this.torus = new Die(this.scene, 4);
+		this.die = new Die(this.scene, 4);
 
 		// Set initial sizes
 		this.onWindowResize(window.innerWidth, window.innerHeight);
 	}
 
 	public onDieTypeChange(sides: SideTypes) {
-		this.torus.onDieTypeChange(sides);
+		this.die.onDieTypeChange(sides);
 	}
 
 	public onWindowResize(vpW: number, vpH: number): void {
@@ -41,7 +41,7 @@ export default class View {
 	}
 
 	public update(secs: number): void {
-		this.torus.update(secs);
+		this.die.update(secs);
 		this.renderer.render(this.scene, this.camera);
 	}
 }
