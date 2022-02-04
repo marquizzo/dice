@@ -13,64 +13,67 @@ import fragShader from "./glsl/torus.fs";
 import { randInt } from "~Utils";
 import { SideTypes } from "~Utils/Constants";
 
-const GEOM = {
-	tetra: new THREE.TetrahedronGeometry(1),
-	cube: new THREE.BoxGeometry(1),
-	octa: new THREE.OctahedronGeometry(1),
-	dodeca: new THREE.DodecahedronGeometry(1),
-	icos: new THREE.IcosahedronGeometry(1),
+const PLATONICS = {
+	TETRA: new THREE.TetrahedronGeometry(1),
+	CUBE: new THREE.BoxGeometry(1),
+	OCTA: new THREE.OctahedronGeometry(1),
+	DODECA: new THREE.DodecahedronGeometry(1),
+	ICOS: new THREE.IcosahedronGeometry(1),
 };
 
 export default class Die {
+	private geom: THREE.BufferGeometry;
+	private mat: THREE.Material;
 	public mesh: THREE.Mesh;
+
+	private boundShape: CANNON.ConvexPolyhedron;
 	public body: CANNON.Body;
-	public shapePhys: CANNON.ConvexPolyhedron;
 
 	private timeU: THREE.IUniform;
 
 	constructor(sides: SideTypes) {
-		/*const mat = new THREE.RawShaderMaterial({
-			uniforms: {
-				time: {value: 0}
-			},
-			vertexShader: vertShader,
-			fragmentShader: fragShader
-		});*/
-		// this.timeU = mat.uniforms.time;
-		const geom = this.updateGeometry(sides);
-		const mat = new THREE.MeshNormalMaterial();
-		this.mesh = new THREE.Mesh(geom, mat);
+		this.mat = new THREE.MeshNormalMaterial();
 		this.body = new CANNON.Body({
-			mass: 5,
-			shape: this.shapePhys
-		})
+			mass: 1,
+		});
+		this.updateGeometry(sides);
 	}
 
-	// Returns new geometry based on sides
-	private updateGeometry(sides: SideTypes): THREE.BufferGeometry {
-		let newGeom: THREE.BufferGeometry;
-
-		switch (sides) {
-			case 4:
-				newGeom = GEOM.tetra;
-			break;
-			case 6:
-				newGeom = GEOM.cube;
-			break;
-			case 8:
-				newGeom = GEOM.octa;
-			break;
-			case 12:
-				newGeom = GEOM.dodeca;
-			break;
-			case 20:
-				newGeom = GEOM.icos;
-			break;
+	// Updates die geometry & bounding box by sides
+	public updateGeometry(sides: SideTypes): void {
+		// Removes old shape if it exists
+		if (this.boundShape) {
+			this.body.removeShape(this.boundShape);
 		}
 
-		const pos = newGeom.getAttribute("position").array;
+		// Pick new geom
+		switch (sides) {
+			case 4:
+				this.geom = PLATONICS.TETRA;
+			break;
+			case 6:
+				this.geom = PLATONICS.CUBE;
+			break;
+			case 8:
+				this.geom = PLATONICS.OCTA;
+			break;
+			case 12:
+				this.geom = PLATONICS.DODECA;
+			break;
+			case 20:
+				this.geom = PLATONICS.ICOS;
+			break;
+		}
+		if (!this.mesh) {
+			this.mesh = new THREE.Mesh(this.geom, this.mat);
+		} else {
+			this.mesh.geometry = this.geom;
+		}
+
+		// Build physics bounding shape
+		const pos = this.geom.getAttribute("position").array;
 		const vertArray: Array<CANNON.Vec3> = [];
-		// Extract geometry into Cannon vertex array
+
 		for(let i3 = 0; i3 < pos.length; i3 += 3) {
 			vertArray.push(new CANNON.Vec3(
 				pos[i3 + 0],
@@ -78,19 +81,22 @@ export default class Die {
 				pos[i3 + 2],
 			));
 		}
-		this.shapePhys = new CANNON.ConvexPolyhedron({ vertices: vertArray });
-
-		return newGeom;
-	}
-
-	public onDieTypeChange(sides: SideTypes) {
-		const newGeom = this.updateGeometry(sides);
-		this.mesh.geometry = newGeom;
+		this.boundShape = new CANNON.ConvexPolyhedron({ vertices: vertArray });
+		this.body.addShape(this.boundShape);
 	}
 
 	public update(secs: number): void {
-		// this.timeU.value = secs;
 		this.mesh.position.copy(this.body.position as any as THREE.Vector3);
 		this.mesh.quaternion.copy(this.body.quaternion as any as THREE.Quaternion);
 	}
 }
+
+
+/*const mat = new THREE.RawShaderMaterial({
+	uniforms: {
+		time: {value: 0}
+	},
+	vertexShader: vertShader,
+	fragmentShader: fragShader
+});
+this.timeU = mat.uniforms.time;*/

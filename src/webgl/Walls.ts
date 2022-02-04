@@ -10,7 +10,7 @@ export default class Walls {
 			type: CANNON.Body.STATIC,
 			shape: new CANNON.Plane()
 		});
-		this.body.quaternion.setFromEuler(-Math.PI / 2, Math.PI / 8, 0);
+		this.body.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
 		this.body.position.y = -2;
 	}
 

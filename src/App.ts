@@ -12,7 +12,7 @@ import { SideTypes } from "~Utils/Constants";
 class App {
 	private view: View;
 	private pane: any;
-	private dieSides: SideTypes = 6;
+	private dieSides: SideTypes = 4;
 
 	constructor() {
 		const canvasBox = <HTMLCanvasElement>document.getElementById("webgl-canvas");

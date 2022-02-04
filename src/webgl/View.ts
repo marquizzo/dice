@@ -53,7 +53,7 @@ export default class View {
 	}
 
 	public onDieTypeChange(sides: SideTypes) {
-		this.die.onDieTypeChange(sides);
+		this.die.updateGeometry(sides);
 	}
 
 	public onWindowResize(vpW: number, vpH: number): void {
