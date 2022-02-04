@@ -7,13 +7,13 @@
 
 import * as THREE from "three";
 
-import Shape from "./Shape";
+import Die from "./Die";
 
 export default class View {
 	private renderer: THREE.WebGLRenderer;
 	private scene: THREE.Scene;
 	private camera: THREE.PerspectiveCamera;
-	private torus: Shape;
+	private torus: Die;
 
 	constructor(canvasElem: HTMLCanvasElement) {
 		this.renderer = new THREE.WebGLRenderer({
@@ -21,10 +21,10 @@ export default class View {
 			antialias: true,
 		});
 		this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-		this.camera.position.z = 15;
+		this.camera.position.z = 10;
 		this.scene = new THREE.Scene();
 		this.scene.background = new THREE.TextureLoader().load("./textures/bgnd.png");
-		this.torus = new Shape(this.scene);
+		this.torus = new Die(this.scene, 4);
 
 		// Set initial sizes
 		this.onWindowResize(window.innerWidth, window.innerHeight);
