@@ -1,3 +1,5 @@
+import { TextureLoader } from "three";
+
 // Random integer from <low, high> interval
 export function randInt(low: number, high: number): number {
     return low + Math.floor(Math.random() * (high - low + 1));
@@ -7,3 +9,5 @@ export function randInt(low: number, high: number): number {
 export function mod(n: number, m: number): number {
     return (n % m + m) % m;
 }
+
+export const texLoader = new TextureLoader();

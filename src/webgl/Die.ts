@@ -10,12 +10,12 @@ import * as CANNON from "cannon-es";
 
 import vertShader from "./glsl/torus.vs";
 import fragShader from "./glsl/torus.fs";
-import { randInt } from "~Utils";
+import { randInt, texLoader } from "~Utils";
 import { SideTypes } from "~Utils/Constants";
 
 export default class Die {
 	private geom: THREE.BufferGeometry;
-	private mat: THREE.Material;
+	private mat: THREE.MeshBasicMaterial;
 	private platonics: THREE.Group;
 	public mesh: THREE.Mesh;
 
@@ -26,10 +26,7 @@ export default class Die {
 
 	constructor(sides: SideTypes, platonics: THREE.Group) {
 		this.platonics = platonics;
-		const texLoader = new THREE.TextureLoader();
-		const texture = texLoader.load("./textures/uvGrid.jpg");
-		texture.anisotropy = 16;
-		this.mat = new THREE.MeshNormalMaterial({
+		this.mat = new THREE.MeshBasicMaterial({
 			// map: texture
 		});
 		/*this.mat = new THREE.RawShaderMaterial({
@@ -73,6 +70,10 @@ export default class Die {
 			break;
 		}
 		this.geom = (<THREE.Mesh>this.platonics.getObjectByName(name)).geometry;
+		const map = texLoader.load(`./textures/map${name}.jpg`);
+		map.anisotropy = 16;
+		map.flipY = false;
+		this.mat.map = map;
 		if (!this.mesh) {
 			this.mesh = new THREE.Mesh(this.geom, this.mat);
 		} else {
