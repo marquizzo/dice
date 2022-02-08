@@ -12,52 +12,40 @@ export default class Walls {
 	private planeBack: CANNON.Body;
 	private planeFront: CANNON.Body;
 
-	constructor() {
+	constructor(matcap: THREE.Texture) {
 		const h = 8;
 		const w = h * window.innerWidth / window.innerHeight;
 		const d = 10;
-		this.mat = new THREE.MeshNormalMaterial();
+		this.mat = new THREE.MeshMatcapMaterial({
+			side: THREE.BackSide,
+			flatShading: true,
+			matcap
+		});
 
 		// Three.js walls
-		const geomLeft = new THREE.PlaneGeometry(d, h);
-		geomLeft.rotateY(Math.PI / 2);
-		geomLeft.translate(-w/2, 0, 0);
-		const geomRight = new THREE.PlaneGeometry(d, h);
-		geomRight.rotateY(-Math.PI / 2);
-		geomRight.translate(w/2, 0, 0);
-		const geomTop = new THREE.PlaneGeometry(w, d);
-		geomTop.rotateX(Math.PI / 2);
-		geomTop.translate(0, h/2, 0);
-		const geomBot = new THREE.PlaneGeometry(w, d);
-		geomBot.rotateX(-Math.PI / 2);
-		geomBot.translate(0, -h/2, 0);
-		const geomAll = mergeBufferGeometries([geomLeft, geomRight, geomTop, geomBot]);
-		this.mesh = new THREE.Mesh(geomAll, this.mat);
+		const geom = new THREE.CylinderGeometry(1, 1, d, 4, 1, false);
+		geom.rotateX(Math.PI / 2);
+		geom.rotateZ(Math.PI / 4);
+		geom.translate(0, 0, -d / 2);
+		this.mesh = new THREE.Mesh(geom, this.mat);
 
 		// Cannon walls
 		this.planeTop = this.makePlane();
 		this.planeTop.quaternion.setFromEuler(Math.PI / 2, 0, 0);
-		this.planeTop.position.y = h/2;
 
 		this.planeBot = this.makePlane();
 		this.planeBot.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
-		this.planeBot.position.y = -h/2;
 
 		this.planeLeft = this.makePlane();
 		this.planeLeft.quaternion.setFromEuler(0, Math.PI / 2, 0);
-		this.planeLeft.position.x = -w/2;
 
 		this.planeRight = this.makePlane();
 		this.planeRight.quaternion.setFromEuler(0, -Math.PI / 2, 0);
-		this.planeRight.position.x = w/2;
 
 		this.planeBack = this.makePlane();
 		this.planeBack.quaternion.setFromEuler(0, 0, Math.PI);
-		this.planeBack.position.z = -d/2;
 
 		this.planeFront = this.makePlane();
-		// this.planeFront.quaternion.setFromEuler(0, 0, 0);
-		this.planeFront.position.z = -d/2;
 	}
 
 	private makePlane(): CANNON.Body {
@@ -77,5 +65,23 @@ export default class Walls {
 		world.addBody(this.planeRight);
 		world.addBody(this.planeBack);
 		// world.addBody(this.planeFront);
+	}
+
+	// Position walls against viewport edges on browser resize
+	public onWindowResize(vpW: number, vpH: number): void {
+		const h = 8;
+		const w = h * window.innerWidth / window.innerHeight;
+		const d = 10;
+
+		// Scale room walls
+		this.mesh.scale.set(w, h, 1);
+
+		// Position physics planes
+		this.planeTop.position.y = h/2;
+		this.planeBot.position.y = -h/2;
+		this.planeLeft.position.x = -w/2;
+		this.planeRight.position.x = w/2;
+		this.planeBack.position.z = -d/2;
+		this.planeFront.position.z = -d/2;
 	}
 }

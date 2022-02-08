@@ -47,7 +47,7 @@ export default class View {
 		this.scene.add(this.die.mesh);
 		this.world.addBody(this.die.body);
 
-		this.walls = new Walls();
+		this.walls = new Walls(matcap);
 		this.walls.addToView(this.scene, this.world);
 
 		// Set initial sizes
@@ -66,6 +66,7 @@ export default class View {
 		this.renderer.setSize(vpW, vpH);
 		this.camera.aspect = vpW / vpH;
 		this.camera.updateProjectionMatrix();
+		this.walls.onWindowResize(vpW, vpH);
 	}
 
 	public update(secs: number): void {
