@@ -8,6 +8,7 @@
 import View from "./webgl/View";
 import { Pane } from "tweakpane";
 import { SideTypes } from "~Utils/Constants";
+import { GLTFLoader, GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 
 class App {
 	private view: View;
@@ -16,8 +17,16 @@ class App {
 	private gravity = {x: 0, y: 9.82};
 
 	constructor() {
+		const gltfLoader = new GLTFLoader();
+		gltfLoader.load("./models/platonics.glb", this.init);
+
+		window.addEventListener("resize", this.resize);
+	}
+
+	private init = (payload: GLTF):void => {
+		console.log(payload);
 		const canvasBox = <HTMLCanvasElement>document.getElementById("webgl-canvas");
-		this.view = new View(canvasBox);
+		this.view = new View(canvasBox, payload.scene);
 
 		// Add GUI
 		this.pane = new Pane();
@@ -32,8 +41,6 @@ class App {
 			x: { min: -10, max: 10},
 			y: { min: -10, max: 10},
 		}).on("change", this.gravityChanged);
-
-		window.addEventListener("resize", this.resize);
 		this.update(0);
 	}
 

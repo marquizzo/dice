@@ -24,7 +24,7 @@ export default class View {
 	private walls: Walls;
 	private die: Die;
 
-	constructor(canvasElem: HTMLCanvasElement) {
+	constructor(canvasElem: HTMLCanvasElement, platonics: THREE.Group) {
 		// Three.js setup
 		this.renderer = new THREE.WebGLRenderer({
 			canvas: canvasElem,
@@ -41,7 +41,7 @@ export default class View {
 			gravity: new CANNON.Vec3(0, -9.82, 0),
 		});
 
-		this.die = new Die(4);
+		this.die = new Die(4, platonics);
 		this.scene.add(this.die.mesh);
 		this.world.addBody(this.die.body);
 

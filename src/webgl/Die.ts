@@ -13,17 +13,10 @@ import fragShader from "./glsl/torus.fs";
 import { randInt } from "~Utils";
 import { SideTypes } from "~Utils/Constants";
 
-const PLATONICS = {
-	TETRA: new THREE.TetrahedronGeometry(1),
-	CUBE: new THREE.BoxGeometry(1),
-	OCTA: new THREE.OctahedronGeometry(1),
-	DODECA: new THREE.DodecahedronGeometry(1),
-	ICOS: new THREE.IcosahedronGeometry(1),
-};
-
 export default class Die {
 	private geom: THREE.BufferGeometry;
 	private mat: THREE.Material;
+	private platonics: THREE.Group;
 	public mesh: THREE.Mesh;
 
 	private boundShape: CANNON.ConvexPolyhedron;
@@ -31,8 +24,22 @@ export default class Die {
 
 	private timeU: THREE.IUniform;
 
-	constructor(sides: SideTypes) {
-		this.mat = new THREE.MeshNormalMaterial();
+	constructor(sides: SideTypes, platonics: THREE.Group) {
+		this.platonics = platonics;
+		const texLoader = new THREE.TextureLoader();
+		const texture = texLoader.load("./textures/uvGrid.jpg");
+		texture.anisotropy = 16;
+		this.mat = new THREE.MeshNormalMaterial({
+			// map: texture
+		});
+		/*this.mat = new THREE.RawShaderMaterial({
+			uniforms: {
+				time: {value: 0}
+			},
+			vertexShader: vertShader,
+			fragmentShader: fragShader
+		});
+		this.timeU = this.mat.uniforms.time;*/
 		this.body = new CANNON.Body({
 			mass: 1,
 		});
@@ -47,23 +54,25 @@ export default class Die {
 		}
 
 		// Pick new geom
+		let name: string;
 		switch (sides) {
 			case 4:
-				this.geom = PLATONICS.TETRA;
+				name = "Tetra";
 			break;
 			case 6:
-				this.geom = PLATONICS.CUBE;
+				name = "Hexa";
 			break;
 			case 8:
-				this.geom = PLATONICS.OCTA;
+				name = "Octa";
 			break;
 			case 12:
-				this.geom = PLATONICS.DODECA;
+				name = "Dodeca";
 			break;
 			case 20:
-				this.geom = PLATONICS.ICOS;
+				name = "Icos";
 			break;
 		}
+		this.geom = (<THREE.Mesh>this.platonics.getObjectByName(name)).geometry;
 		if (!this.mesh) {
 			this.mesh = new THREE.Mesh(this.geom, this.mat);
 		} else {
@@ -96,6 +105,7 @@ export default class Die {
 	}
 
 	public update(secs: number): void {
+		// this.timeU.value = secs;
 		this.mesh.position.copy(this.body.position as any as THREE.Vector3);
 		this.mesh.quaternion.copy(this.body.quaternion as any as THREE.Quaternion);
 	}
