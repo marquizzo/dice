@@ -15,7 +15,7 @@ import { SideTypes } from "~Utils/Constants";
 
 export default class Die {
 	private geom: THREE.BufferGeometry;
-	private mat: THREE.MeshBasicMaterial;
+	private mat: THREE.MeshMatcapMaterial;
 	private platonics: THREE.Group;
 	public mesh: THREE.Mesh;
 
@@ -24,9 +24,10 @@ export default class Die {
 
 	private timeU: THREE.IUniform;
 
-	constructor(sides: SideTypes, platonics: THREE.Group) {
+	constructor(sides: SideTypes, platonics: THREE.Group, matcap: THREE.Texture) {
 		this.platonics = platonics;
-		this.mat = new THREE.MeshBasicMaterial({
+		this.mat = new THREE.MeshMatcapMaterial({
+			matcap: matcap
 			// map: texture
 		});
 		/*this.mat = new THREE.RawShaderMaterial({

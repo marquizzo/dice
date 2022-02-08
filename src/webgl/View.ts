@@ -9,6 +9,7 @@ import * as THREE from "three";
 import * as CANNON from "cannon-es";
 import Die from "./Die";
 import Walls from "./Walls";
+import { texLoader } from "~Utils";
 import { SideTypes } from "~Utils/Constants";
 
 export default class View {
@@ -35,13 +36,14 @@ export default class View {
 		this.clock = new THREE.Clock(true);
 		this.scene = new THREE.Scene();
 		this.scene.background = new THREE.TextureLoader().load("./textures/bgnd.png");
+		const matcap = texLoader.load("./textures/matcap.png");
 
 		// Cannon setup
 		this.world = new CANNON.World({
 			gravity: new CANNON.Vec3(0, -9.82, 0),
 		});
 
-		this.die = new Die(4, platonics);
+		this.die = new Die(4, platonics, matcap);
 		this.scene.add(this.die.mesh);
 		this.world.addBody(this.die.body);
 
