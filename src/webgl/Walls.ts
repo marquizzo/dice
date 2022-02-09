@@ -18,18 +18,15 @@ export default class Walls {
 		const d = 10;
 		this.mat = new THREE.MeshMatcapMaterial({
 			side: THREE.BackSide,
-			flatShading: true,
 			matcap
 		});
 
 		// Three.js walls
-		const geom = new THREE.CylinderGeometry(1, 1, d, 4, 1, false);
-		geom.rotateX(Math.PI / 2);
-		geom.rotateZ(Math.PI / 4);
-		geom.translate(0, 0, -d / 2);
+		const geom = new THREE.BoxGeometry(1, 1, d, 4, 1);
 		this.mesh = new THREE.Mesh(geom, this.mat);
+		this.mesh.receiveShadow = true;
 
-		// Cannon walls
+		// Physics walls
 		this.planeTop = this.makePlane();
 		this.planeTop.quaternion.setFromEuler(Math.PI / 2, 0, 0);
 

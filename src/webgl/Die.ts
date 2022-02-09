@@ -77,6 +77,7 @@ export default class Die {
 		this.mat.map = map;
 		if (!this.mesh) {
 			this.mesh = new THREE.Mesh(this.geom, this.mat);
+			this.mesh.castShadow = true;
 		} else {
 			this.mesh.geometry = this.geom;
 		}

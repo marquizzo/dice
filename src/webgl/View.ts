@@ -18,9 +18,11 @@ export default class View {
 	private scene: THREE.Scene;
 	private clock: THREE.Clock;
 	private camera: THREE.PerspectiveCamera;
+	private light: THREE.SpotLight;
 
 	// Cannon
 	private world: CANNON.World;
+	private gravity = new THREE.Vector3();
 
 	private walls: Walls;
 	private die: Die;
@@ -36,7 +38,7 @@ export default class View {
 		this.clock = new THREE.Clock(true);
 		this.scene = new THREE.Scene();
 		this.scene.background = new THREE.TextureLoader().load("./textures/bgnd.png");
-		const matcap = texLoader.load("./textures/matcap.png");
+		const matcap = texLoader.load("./textures/envGlassy3.jpg");
 
 		// Cannon setup
 		this.world = new CANNON.World({
@@ -50,6 +52,21 @@ export default class View {
 		this.walls = new Walls(matcap);
 		this.walls.addToView(this.scene, this.world);
 
+		// Shadow setup
+		this.renderer.shadowMap.enabled = true;
+		this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+		this.light = new THREE.SpotLight(0xffffff, 1, 50, 20, 1);
+		this.light.position.set(0, 8, 4);
+		this.light.castShadow = true;
+		this.scene.add(this.light);
+		// this.light.target = this.die.mesh;
+		// this.scene.add(this.light.target);
+
+		this.light.shadow.mapSize.width = 1024; // default
+		this.light.shadow.mapSize.height = 1024; // default
+		this.light.shadow.camera.near = 1; // default
+		this.light.shadow.camera.far = 50; // default
+
 		// Set initial sizes
 		this.onWindowResize(window.innerWidth, window.innerHeight);
 	}
@@ -59,7 +76,14 @@ export default class View {
 	}
 
 	public onGravityChange(gravity: any) {
-		this.world.gravity.set(0, -gravity.y, gravity.x);
+		this.world.gravity.set(gravity.x, -gravity.y, 0);
+	}
+
+	// Apply gimbal rotations to gravity
+	public onGimbalChange(rotation: THREE.Quaternion): void {
+		this.gravity.set(0, -9.8, 0);
+		this.gravity.applyQuaternion(rotation);
+		this.world.gravity.set(this.gravity.x, this.gravity.y, this.gravity.z);
 	}
 
 	public onWindowResize(vpW: number, vpH: number): void {
@@ -73,6 +97,10 @@ export default class View {
 		const delta = Math.min(this.clock.getDelta(), 0.5);
 		this.world.step(delta);
 		this.die.update(secs);
+
+		// const pos = this.die.mesh.position;
+		// this.light.target = ;
+		this.light.updateMatrix();
 		this.renderer.render(this.scene, this.camera);
 	}
 }
