@@ -21,8 +21,8 @@ void main() {
 	vec3 viewDir = normalize( vViewPosition );
 
     ///////////////////// FRESNEL /////////////////////
-    float fresnel = dot(viewDir, vViewNormal);
-    fresnel = smoothstep(0.8, 0.9, fresnel);
+    float fresnel = dot(vec3(0.0, 0.0, 1.0), vViewNormal);
+    fresnel = step(0.95, fresnel);
 
 	///////////////////// ENV MATCAP /////////////////////
 	// Calc direction
@@ -38,8 +38,7 @@ void main() {
 	vec4 dieMapping = texture2D( uMap, vUv );
 	vec4 finalColor = mix(colorMatte, colorGold, dieMapping.r);
 	finalColor = mix(finalColor, colorGlass, dieMapping.g);
-	finalColor = mix(finalColor, colorGold, (dieMapping.g) * fresnel);
-	// finalColor = vec4(fresnel, fresnel, fresnel, 1.0);
+	finalColor = mix(finalColor, colorGold, dieMapping.g * fresnel);
 
 	gl_FragColor = finalColor;
 }

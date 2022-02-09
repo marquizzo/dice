@@ -12,6 +12,8 @@ import Walls from "./Walls";
 import { texLoader } from "~Utils";
 import { SideTypes } from "~Utils/Constants";
 
+const GRAVITY_MAGNITUDE = 60;
+
 export default class View {
 	// Three.js
 	private renderer: THREE.WebGLRenderer;
@@ -21,7 +23,8 @@ export default class View {
 
 	// Cannon
 	private world: CANNON.World;
-	private gravity = new THREE.Vector3();
+	private gravVec = new THREE.Vector3();
+	private contactMat: CANNON.ContactMaterial;
 
 	private walls: Walls;
 	private die: Die;
@@ -32,8 +35,8 @@ export default class View {
 			canvas: canvasElem,
 			antialias: true,
 		});
-		this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-		this.camera.position.z = 10;
+		this.camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+		this.camera.position.z = 40;
 		this.clock = new THREE.Clock(true);
 		this.scene = new THREE.Scene();
 
@@ -45,33 +48,47 @@ export default class View {
 
 		// Cannon setup
 		this.world = new CANNON.World({
-			gravity: new CANNON.Vec3(0, -30, 0),
+			gravity: new CANNON.Vec3(0, 0, 0),
 		});
 
 		this.die = new Die(12, platonics, envs);
 		this.scene.add(this.die.mesh);
 		this.world.addBody(this.die.body);
 
+	
 		this.walls = new Walls(envs.matte);
 		this.walls.addToView(this.scene, this.world);
+
+		const wallBounceMat = this.walls.bounceMat;
+		const dieBounceMat = this.die.bounceMat;
+		const contactOptions = {friction: 0.1, restitution: 0.5 };
+		this.contactMat = new CANNON.ContactMaterial(wallBounceMat, dieBounceMat, contactOptions);
+		this.world.addContactMaterial(this.contactMat);
 
 		// Set initial sizes
 		this.onWindowResize(window.innerWidth, window.innerHeight);
 	}
 
+	// Change die sides
 	public onDieTypeChange(sides: SideTypes) {
 		this.die.updateGeometry(sides);
 	}
 
-	public onGravityChange(gravity: any) {
-		this.world.gravity.set(0, -gravity.y, gravity.x);
+	// Manual gravity change
+	public onGravityChange(input: any) {
+		let zMagnitude = 1.0 - Math.sqrt(input.x * input.x + input.y * input.y);
+		zMagnitude = Math.max(zMagnitude, 0.0);
+		this.gravVec.set(input.x, input.y, zMagnitude);
+		this.gravVec.normalize();
+		this.gravVec.multiplyScalar(GRAVITY_MAGNITUDE);
+		this.world.gravity.set(this.gravVec.x, -this.gravVec.y, -this.gravVec.z);
 	}
 
 	// Apply gimbal rotations to gravity
 	public onGimbalChange(rotation: THREE.Quaternion): void {
-		this.gravity.set(0, -30, 0);
-		this.gravity.applyQuaternion(rotation);
-		this.world.gravity.set(this.gravity.x, this.gravity.y, this.gravity.z);
+		this.gravVec.set(0, -60, 0);
+		this.gravVec.applyQuaternion(rotation);
+		this.world.gravity.set(this.gravVec.x, this.gravVec.y, this.gravVec.z);
 	}
 
 	public onWindowResize(vpW: number, vpH: number): void {

@@ -1,8 +1,7 @@
 /*
- * Shape.ts
+ * Die.ts
  * ===========
- * Placeholder shape to demonstrate setup works. 
- * Has capacity to import custom .glsl shader files
+ * Single die visualization with physics body
  */
 
 import * as THREE from "three";
@@ -26,6 +25,7 @@ export default class Die {
 
 	private boundShape: CANNON.ConvexPolyhedron;
 	public body: CANNON.Body;
+	public bounceMat: CANNON.Material;
 
 	private timeU: THREE.IUniform;
 	private mapU: THREE.IUniform;
@@ -46,8 +46,11 @@ export default class Die {
 		this.timeU = this.mat.uniforms.time;
 		this.mapU = this.mat.uniforms.uMap;
 
+		this.bounceMat = new CANNON.Material("die-bounce");
 		this.body = new CANNON.Body({
 			mass: 1,
+			material: this.bounceMat,
+			linearDamping: 0.1
 		});
 		this.updateGeometry(sides);
 	}
@@ -96,21 +99,34 @@ export default class Die {
 		// Build physics bounding shape
 		const pos = this.geom.getAttribute("position").array;
 		const vertArray: Array<CANNON.Vec3> = [];
+		let dupe: CANNON.Vec3;
 
 		for(let i3 = 0; i3 < pos.length; i3 += 3) {
-			vertArray.push(new CANNON.Vec3(
-				pos[i3 + 0],
-				pos[i3 + 1],
-				pos[i3 + 2],
-			));
+			// Find duplicates
+			dupe = vertArray.find((elem) => 
+				elem.x === pos[i3 + 0] &&
+				elem.y === pos[i3 + 1] &&
+				elem.z === pos[i3 + 2]
+			);
+
+			// Add to array if no dupe found
+			if (!dupe) {
+				vertArray.push(new CANNON.Vec3(
+					pos[i3 + 0],
+					pos[i3 + 1],
+					pos[i3 + 2],
+				));
+			}
 		}
+
+		const randFloat = THREE.MathUtils.randFloatSpread;
+
 		// Reset body
 		this.boundShape = new CANNON.ConvexPolyhedron({ vertices: vertArray });
 		this.body.addShape(this.boundShape);
-		this.body.position.set(0, 0, 0);
+		this.body.position.set(0, randFloat(10), 0);
 		this.body.velocity.setZero();
 
-		const randFloat = THREE.MathUtils.randFloatSpread;
 		this.body.angularVelocity.set(
 			randFloat(10),
 			randFloat(10),

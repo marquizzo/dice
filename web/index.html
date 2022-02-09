@@ -7,6 +7,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no,shrink-to-fit=no">
 	<meta name="description" content="ThreeJS, TypeScript, GLSL, & Webpack boilerplate for quick prototyping.">
 	<meta name="author" content="Marquizzo">
+	<link rel="icon" type="image/png" href="../img/shell/favicon.png" />
 	<style type="text/css">
 		body, html{
 			margin: 0px;
@@ -17,6 +18,7 @@
 			font-family: Arial, Helvetica, sans-serif;
 			color: #fff;
 			line-height: 1;
+			font-size: 12px;
 		}
 		main {
 			width: 100%;
@@ -25,8 +27,8 @@
 		}
 		header {
 			position: absolute;
-			top: 0;
-			left: 0;
+			top: 8px;
+			left: 8px;
 		}
 		h1, p {
 			margin: 0;
@@ -39,7 +41,7 @@
 <canvas id="webgl-canvas"></canvas>
 <header>
 	<h1>Virtual Dice Roller</h1>
-	<p>Design and build a virtual dice rolling experience.</p>
+	<p id="instructions">Tap corner button on iOS device to enable gyroscope.</p>
 </header>
 </main>
 
