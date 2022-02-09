@@ -1,7 +1,7 @@
 # Virtual Dice Rolling Experience
 Design and build a virtual dice rolling experience.
 
-###Requirements
+### Requirements
 - Implement your experience with any iOS or macOS compatible 3D framework or engine (Unity, Unreal, WebGL, SceneKit, RealityKit, ARKit etc).
 - Feel free to interpret this assignment to best demonstrate your design and technical skillset.
 - This assignment should take no more than 8 hours to complete. 
