@@ -15,14 +15,13 @@ import Gimbal from "~Utils/Gimbal.js";
 class App {
 	private view: View;
 	private pane: any;
-	private dieSides: SideTypes = 4;
+	private dieSides: SideTypes = 12;
 	private gravity = {x: 0, y: 9.82};
 	private gimbal: Gimbal;
 
 	constructor() {
 		const gltfLoader = new GLTFLoader();
 		gltfLoader.load("./models/platonics.glb", this.init);
-		this.gimbal = new Gimbal();
 
 		window.addEventListener("resize", this.resize);
 	}
@@ -48,8 +47,8 @@ class App {
 			picker: 'inline',
 			expanded: true,
 			label: "Gravity",
-			x: { min: -10, max: 10},
-			y: { min: -10, max: 10},
+			x: { min: -30, max: 30},
+			y: { min: -30, max: 30},
 		}).on("change", this.gravityChanged);
 		this.update(0);
 	}
@@ -68,6 +67,7 @@ class App {
 		motion.requestPermission().then((response: any) => {
 			if (response == 'granted') {
 				// Now we can enable the gimbal!
+				this.gimbal = new Gimbal();
 				this.gimbal.enable();
 			}
 		});
@@ -87,8 +87,10 @@ class App {
 	}
 
 	private update = (t: number): void => {
-		this.gimbal.update();
-		this.view.onGimbalChange(this.gimbal.quaternion);
+		if (this.gimbal) {
+			this.gimbal.update();
+			this.view.onGimbalChange(this.gimbal.quaternion);
+		}
 		this.view.update(t / 1000);
 		requestAnimationFrame(this.update);
 	}

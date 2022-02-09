@@ -8,14 +8,19 @@
 import * as THREE from "three";
 import * as CANNON from "cannon-es";
 
-import vertShader from "./glsl/torus.vs";
-import fragShader from "./glsl/torus.fs";
+import vertShader from "./glsl/die.vs";
+import fragShader from "./glsl/die.fs";
 import { randInt, texLoader } from "~Utils";
 import { SideTypes } from "~Utils/Constants";
 
+interface Matcaps {
+	gold: THREE.Texture,
+	glass: THREE.Texture
+}
+
 export default class Die {
 	private geom: THREE.BufferGeometry;
-	private mat: THREE.MeshMatcapMaterial;
+	private mat: THREE.RawShaderMaterial;
 	private platonics: THREE.Group;
 	public mesh: THREE.Mesh;
 
@@ -23,21 +28,24 @@ export default class Die {
 	public body: CANNON.Body;
 
 	private timeU: THREE.IUniform;
+	private mapU: THREE.IUniform;
 
-	constructor(sides: SideTypes, platonics: THREE.Group, matcap: THREE.Texture) {
+	constructor(sides: SideTypes, platonics: THREE.Group, matcaps: Matcaps) {
 		this.platonics = platonics;
-		this.mat = new THREE.MeshMatcapMaterial({
-			matcap: matcap
-			// map: texture
-		});
-		/*this.mat = new THREE.RawShaderMaterial({
+
+		this.mat = new THREE.RawShaderMaterial({
 			uniforms: {
-				time: {value: 0}
+				time: { value: 0 },
+				uEnvGold: { value: matcaps.gold },
+				uEnvGlass: { value: matcaps.glass },
+				uMap: { value: null }
 			},
 			vertexShader: vertShader,
 			fragmentShader: fragShader
 		});
-		this.timeU = this.mat.uniforms.time;*/
+		this.timeU = this.mat.uniforms.time;
+		this.mapU = this.mat.uniforms.uMap;
+
 		this.body = new CANNON.Body({
 			mass: 1,
 		});
@@ -71,10 +79,13 @@ export default class Die {
 			break;
 		}
 		this.geom = (<THREE.Mesh>this.platonics.getObjectByName(name)).geometry;
-		const map = texLoader.load(`./textures/map${name}.jpg`);
+
+		// Update number mapping
+		const map = texLoader.load(`./textures/map${name}.png`);
 		map.anisotropy = 16;
 		map.flipY = false;
-		this.mat.map = map;
+		this.mapU.value = map;
+
 		if (!this.mesh) {
 			this.mesh = new THREE.Mesh(this.geom, this.mat);
 			this.mesh.castShadow = true;
@@ -96,7 +107,7 @@ export default class Die {
 		// Reset body
 		this.boundShape = new CANNON.ConvexPolyhedron({ vertices: vertArray });
 		this.body.addShape(this.boundShape);
-		this.body.position.set(0, 0, -3);
+		this.body.position.set(0, 0, 0);
 		this.body.velocity.setZero();
 
 		const randFloat = THREE.MathUtils.randFloatSpread;
@@ -108,18 +119,8 @@ export default class Die {
 	}
 
 	public update(secs: number): void {
-		// this.timeU.value = secs;
+		this.timeU.value = secs;
 		this.mesh.position.copy(this.body.position as any as THREE.Vector3);
 		this.mesh.quaternion.copy(this.body.quaternion as any as THREE.Quaternion);
 	}
 }
-
-
-/*const mat = new THREE.RawShaderMaterial({
-	uniforms: {
-		time: {value: 0}
-	},
-	vertexShader: vertShader,
-	fragmentShader: fragShader
-});
-this.timeU = mat.uniforms.time;*/

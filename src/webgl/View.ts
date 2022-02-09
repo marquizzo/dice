@@ -18,7 +18,6 @@ export default class View {
 	private scene: THREE.Scene;
 	private clock: THREE.Clock;
 	private camera: THREE.PerspectiveCamera;
-	private light: THREE.SpotLight;
 
 	// Cannon
 	private world: CANNON.World;
@@ -37,35 +36,24 @@ export default class View {
 		this.camera.position.z = 10;
 		this.clock = new THREE.Clock(true);
 		this.scene = new THREE.Scene();
-		this.scene.background = new THREE.TextureLoader().load("./textures/bgnd.png");
-		const matcap = texLoader.load("./textures/envGlassy3.jpg");
+
+		const envs = {
+			matte: texLoader.load("./textures/envMatte1.png"),
+			gold: texLoader.load("./textures/envGold3.png"),
+			glass: texLoader.load("./textures/envGlassy3.jpg"),
+		};
 
 		// Cannon setup
 		this.world = new CANNON.World({
-			gravity: new CANNON.Vec3(0, -9.82, 0),
+			gravity: new CANNON.Vec3(0, -30, 0),
 		});
 
-		this.die = new Die(4, platonics, matcap);
+		this.die = new Die(12, platonics, envs);
 		this.scene.add(this.die.mesh);
 		this.world.addBody(this.die.body);
 
-		this.walls = new Walls(matcap);
+		this.walls = new Walls(envs.matte);
 		this.walls.addToView(this.scene, this.world);
-
-		// Shadow setup
-		this.renderer.shadowMap.enabled = true;
-		this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-		this.light = new THREE.SpotLight(0xffffff, 1, 50, 20, 1);
-		this.light.position.set(0, 8, 4);
-		this.light.castShadow = true;
-		this.scene.add(this.light);
-		// this.light.target = this.die.mesh;
-		// this.scene.add(this.light.target);
-
-		this.light.shadow.mapSize.width = 1024; // default
-		this.light.shadow.mapSize.height = 1024; // default
-		this.light.shadow.camera.near = 1; // default
-		this.light.shadow.camera.far = 50; // default
 
 		// Set initial sizes
 		this.onWindowResize(window.innerWidth, window.innerHeight);
@@ -76,12 +64,12 @@ export default class View {
 	}
 
 	public onGravityChange(gravity: any) {
-		this.world.gravity.set(gravity.x, -gravity.y, 0);
+		this.world.gravity.set(0, -gravity.y, gravity.x);
 	}
 
 	// Apply gimbal rotations to gravity
 	public onGimbalChange(rotation: THREE.Quaternion): void {
-		this.gravity.set(0, -9.8, 0);
+		this.gravity.set(0, -30, 0);
 		this.gravity.applyQuaternion(rotation);
 		this.world.gravity.set(this.gravity.x, this.gravity.y, this.gravity.z);
 	}
@@ -98,9 +86,6 @@ export default class View {
 		this.world.step(delta);
 		this.die.update(secs);
 
-		// const pos = this.die.mesh.position;
-		// this.light.target = ;
-		this.light.updateMatrix();
 		this.renderer.render(this.scene, this.camera);
 	}
 }

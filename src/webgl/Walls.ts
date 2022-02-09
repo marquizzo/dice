@@ -18,7 +18,7 @@ export default class Walls {
 		const d = 10;
 		this.mat = new THREE.MeshMatcapMaterial({
 			side: THREE.BackSide,
-			matcap
+			matcap,
 		});
 
 		// Three.js walls
